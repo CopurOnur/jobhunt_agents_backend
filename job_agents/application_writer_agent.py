@@ -226,5 +226,186 @@ Begin with a concise checklist (3–7 bullets) of what you will do; keep items c
     return agent
 
 
+def create_interactive_application_writer_agent(
+    base_cv: str,
+    base_motivation_letter: str
+) -> Agent:
+    """
+    Create an interactive ApplicationWriterAgent that uses user-provided materials.
+    This version is designed for conversational refinement of application materials.
+
+    Args:
+        base_cv: User's base CV content
+        base_motivation_letter: User's base motivation letter template
+
+    Returns:
+        Configured Agent instance for interactive use
+    """
+    instructions = f"""You are an expert career coach and application writer. Your role is to customize
+CVs and motivation letters for specific job applications based on the user's existing materials.
+
+You will work interactively with the user to refine their application materials through conversation.
+
+USER'S BASE MATERIALS:
+
+BASE CV:
+```
+{base_cv}
+```
+
+BASE MOTIVATION LETTER:
+```
+{base_motivation_letter}
+```
+
+YOUR OBJECTIVES:
+1. When given a job description, customize the user's CV and motivation letter to match it
+2. Emphasize relevant experience, skills, and achievements from the base materials
+3. Mirror keywords from the job description naturally
+4. Maintain the user's voice and authentic experiences
+5. Accept refinement requests and iterate on the materials
+6. Provide constructive feedback and suggestions
+
+CUSTOMIZATION GUIDELINES FOR CV:
+- Keep the user's existing structure and format
+- Reorder or emphasize sections to match job requirements
+- Add relevant keywords naturally
+- Highlight achievements that align with the role
+- Keep to 1-2 pages maximum
+- Use action verbs and quantifiable results
+
+CUSTOMIZATION GUIDELINES FOR MOTIVATION LETTER:
+- 250-400 words total
+- Show genuine interest in the specific role and company
+- Connect user's background to job requirements
+- Demonstrate understanding of the position
+- Maintain authenticity and the user's voice
+- Professional yet personable tone
+
+CUSTOMIZATION GUIDELINES FOR MATCH SUMMARY:
+- Provide 5-7 bullet points analyzing the match
+- Include estimated match score percentage
+- List key strengths from user's background that align with the role
+- Identify potential gaps or areas to address
+- Provide recommendations for highlighting strengths
+
+INTERACTIVE REFINEMENT:
+When the user requests changes like:
+- "Make it more technical"
+- "Emphasize my leadership experience"
+- "Shorten the motivation letter"
+- "Add more about my project management skills"
+
+Apply the requested changes while maintaining professional quality and coherence.
+
+OUTPUT FORMAT:
+Always return a JSON object with this structure:
+{{
+    "company": "Company Name",
+    "position": "Job Title",
+    "customized_cv": "Full CV content in markdown...",
+    "motivation_letter": "Full letter content in markdown...",
+    "match_summary": "Full summary in markdown..."
+}}
+"""
+
+    agent = Agent(
+        name="InteractiveApplicationWriterAgent",
+        instructions=instructions,
+        output_type=ApplicationMaterials
+    )
+
+    return agent
+
+
+def load_user_materials_from_file(cv_path: str, letter_path: str) -> tuple[str, str]:
+    """
+    Load user's CV and motivation letter from files.
+
+    Args:
+        cv_path: Path to CV file
+        letter_path: Path to motivation letter file
+
+    Returns:
+        Tuple of (cv_content, letter_content)
+    """
+    with open(cv_path, 'r', encoding='utf-8') as f:
+        cv_content = f.read()
+
+    with open(letter_path, 'r', encoding='utf-8') as f:
+        letter_content = f.read()
+
+    return cv_content, letter_content
+
+
+def display_materials(materials: ApplicationMaterials) -> None:
+    """
+    Display application materials in a formatted way for CLI.
+
+    Args:
+        materials: ApplicationMaterials to display
+    """
+    print("\n" + "="*80)
+    print(f"APPLICATION MATERIALS FOR: {materials.company} - {materials.position}")
+    print("="*80)
+
+    print("\n" + "-"*80)
+    print("CUSTOMIZED CV")
+    print("-"*80)
+    print(materials.customized_cv)
+
+    print("\n" + "-"*80)
+    print("MOTIVATION LETTER")
+    print("-"*80)
+    print(materials.motivation_letter)
+
+    print("\n" + "-"*80)
+    print("MATCH SUMMARY")
+    print("-"*80)
+    print(materials.match_summary)
+    print("\n" + "="*80 + "\n")
+
+
+def save_interactive_session(
+    materials: ApplicationMaterials,
+    company_name: str,
+    session_history: list = None
+) -> Dict[str, str]:
+    """
+    Save application materials from an interactive session.
+
+    Args:
+        materials: ApplicationMaterials to save
+        company_name: Company name for folder organization
+        session_history: Optional chat history from the session
+
+    Returns:
+        Dictionary with file paths
+    """
+    # Save materials using existing function
+    file_paths = save_application_materials(materials, company_name)
+
+    # Save session history if provided
+    if session_history:
+        output_dir = Path(file_paths['output_directory'])
+        history_path = output_dir / "session_history.json"
+
+        import json
+        with open(history_path, 'w', encoding='utf-8') as f:
+            json.dump(session_history, f, indent=2, ensure_ascii=False)
+
+        file_paths['history_path'] = str(history_path)
+        print(f"✅ Saved session history to {history_path}")
+
+    return file_paths
+
+
 # Export the agent creator function
-__all__ = ['create_application_writer_agent', 'save_application_materials']
+__all__ = [
+    'create_application_writer_agent',
+    'create_interactive_application_writer_agent',
+    'save_application_materials',
+    'load_user_materials_from_file',
+    'display_materials',
+    'save_interactive_session'
+]

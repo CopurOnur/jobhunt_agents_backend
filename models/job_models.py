@@ -42,3 +42,12 @@ class ApplicationOutput(BaseModel):
     letter_path: str = Field(description="Path to saved motivation letter file")
     summary_path: str = Field(description="Path to saved match summary file")
     output_directory: str = Field(description="Directory containing all files")
+
+
+class UserProvidedMaterials(BaseModel):
+    """Input model for user-provided materials in standalone mode."""
+    base_cv: str = Field(description="User's base CV content")
+    base_motivation_letter: str = Field(description="User's base motivation letter template")
+    job_description: str = Field(description="Job description to customize for")
+    company_name: Optional[str] = Field(default="", description="Company name (optional)")
+    position_title: Optional[str] = Field(default="", description="Position title (optional)")

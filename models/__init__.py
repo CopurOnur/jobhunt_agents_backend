@@ -16,7 +16,8 @@ from .job_models import (
     JobPosting,
     JobSearchOutput,
     ApplicationMaterials,
-    ApplicationOutput
+    ApplicationOutput,
+    UserProvidedMaterials
 )
 
 __all__ = [
@@ -30,5 +31,6 @@ __all__ = [
     'JobPosting',
     'JobSearchOutput',
     'ApplicationMaterials',
-    'ApplicationOutput'
+    'ApplicationOutput',
+    'UserProvidedMaterials'
 ]
