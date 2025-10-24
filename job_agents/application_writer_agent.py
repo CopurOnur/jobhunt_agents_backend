@@ -335,21 +335,21 @@ Return responses as a single structured JSON object. Use the following schemas:
 
 Successful Output Example:
 ```
-{
+{{
   "company": "Company Name or null",
   "position": "Job Title or null",
   "customized_cv_file": "customized_cv.docx",
   "motivation_letter_file": "customized_motivation_letter.docx",
-  "match_summary": "- Match score: 87%\n- Strong leadership in agile projects...",  // Markdown
-  "summary_of_changes": "- Highlighted new certification in CV\n- Shortened final motivation letter paragraph..." // Markdown
-}
+  "match_summary": "- Match score: 87%\\n- Strong leadership in agile projects...",  // Markdown
+  "summary_of_changes": "- Highlighted new certification in CV\\n- Shortened final motivation letter paragraph..." // Markdown
+}}
 ```
 
 Error Output (on missing input):
 ```
-{
-  "error": "Missing base CV input: {base_cv} is required."
-}
+{{
+  "error": "Missing base CV input is required."
+}}
 ```
 
 All outputs must strictly conform to these JSON schemas for downstream processing compatibility.
