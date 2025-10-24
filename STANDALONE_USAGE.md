@@ -276,8 +276,14 @@ async def customize_application():
     # Load materials
     cv, letter = load_user_materials_from_file("my_cv.md", "my_letter.md")
 
-    # Create agent
-    agent = create_interactive_application_writer_agent(cv, letter)
+    # Job description
+    job_description = """
+    Software Engineer position at Google...
+    [Full job description here]
+    """
+
+    # Create agent with materials and job description
+    agent = create_interactive_application_writer_agent(cv, letter, job_description)
 
     # Create session
     session = SQLiteSession(session_id="my_session", db_path="storage/sessions.db")
@@ -285,7 +291,7 @@ async def customize_application():
     # Run generation
     result = await Runner.run(
         agent,
-        "Generate materials for Software Engineer at Google...",
+        "Generate customized materials for this position.",
         session=session
     )
 

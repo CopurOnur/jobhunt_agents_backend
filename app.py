@@ -572,10 +572,11 @@ async def run_writer_initialization_task(session_id: str, request: WriterStartRe
         job_status_store[session_id]["status"] = "running"
         job_status_store[session_id]["started_at"] = datetime.now().isoformat()
 
-        # Create interactive agent with user's materials
+        # Create interactive agent with user's materials and job description
         agent = create_interactive_application_writer_agent(
             base_cv=request.base_cv,
-            base_motivation_letter=request.base_motivation_letter
+            base_motivation_letter=request.base_motivation_letter,
+            job_description=request.job_description
         )
 
         # Create session for conversation continuity

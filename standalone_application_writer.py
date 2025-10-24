@@ -104,14 +104,15 @@ class InteractiveApplicationWriter:
         print(f"   CV: {len(self.base_cv)} characters")
         print(f"   Motivation Letter: {len(self.base_motivation_letter)} characters")
 
-    def initialize_agent(self):
-        """Initialize the agent with user's materials."""
+    def initialize_agent(self, job_description: str):
+        """Initialize the agent with user's materials and job description."""
         print("\n🤖 Initializing AI Agent...\n")
 
-        # Create agent with user's materials
+        # Create agent with user's materials and job description
         self.agent = create_interactive_application_writer_agent(
             base_cv=self.base_cv,
-            base_motivation_letter=self.base_motivation_letter
+            base_motivation_letter=self.base_motivation_letter,
+            job_description=job_description
         )
 
         # Create session for conversation continuity
@@ -300,11 +301,11 @@ Please customize my CV and motivation letter for this position."""
         # Step 1: Load base materials
         self.load_materials_interactive()
 
-        # Step 2: Initialize agent
-        self.initialize_agent()
-
-        # Step 3: Get job description
+        # Step 2: Get job description
         job_description, company_name, position_title = await self.get_job_description()
+
+        # Step 3: Initialize agent with job description
+        self.initialize_agent(job_description)
 
         # Step 4: Generate initial materials
         await self.generate_initial_materials(job_description, company_name, position_title)
