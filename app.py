@@ -12,6 +12,11 @@ from datetime import datetime
 import os
 
 from workflow import JobApplicationWorkflow
+from job_agents.application_writer_agent import (
+    create_interactive_application_writer_agent,
+    save_interactive_session
+)
+from models import ApplicationMaterials
 
 app = FastAPI(
     title="Job Application Flow API",
@@ -94,6 +99,43 @@ class GenerateApplicationsResponse(BaseModel):
     message: str
     selected_jobs_count: int
     timestamp: str
+
+
+# Writer API Models
+class WriterStartRequest(BaseModel):
+    base_cv: str
+    base_motivation_letter: str
+    job_description: str
+    company_name: str
+    position_title: str
+
+
+class WriterSessionResponse(BaseModel):
+    session_id: str
+    status: str
+    message: Optional[str] = None
+    timestamp: str
+
+
+class WriterRefineRequest(BaseModel):
+    refinement_request: str
+
+
+class ApplicationMaterialsResponse(BaseModel):
+    company: str
+    position: str
+    customized_cv: str
+    motivation_letter: str
+    match_summary: str
+
+
+class WriterStatusResponse(BaseModel):
+    session_id: str
+    status: str
+    materials: Optional[ApplicationMaterialsResponse] = None
+    error: Optional[str] = None
+    started_at: Optional[str] = None
+    completed_at: Optional[str] = None
 
 
 async def run_workflow_task(job_id: str):
@@ -516,6 +558,266 @@ async def generate_applications(
         selected_jobs_count=len(request.job_ids),
         timestamp=datetime.now().isoformat()
     )
+
+
+# WRITER API ENDPOINTS
+
+async def run_writer_initialization_task(session_id: str, request: WriterStartRequest):
+    """
+    Background task to initialize writer agent and generate initial materials.
+    """
+    try:
+        from agents import Runner, SQLiteSession
+
+        job_status_store[session_id]["status"] = "running"
+        job_status_store[session_id]["started_at"] = datetime.now().isoformat()
+
+        # Create interactive agent with user's materials
+        agent = create_interactive_application_writer_agent(
+            base_cv=request.base_cv,
+            base_motivation_letter=request.base_motivation_letter
+        )
+
+        # Create session for conversation continuity
+        session = SQLiteSession(session_id=session_id, db_path="storage/sessions.db")
+
+        # Generate initial materials
+        prompt = f"""Generate customized application materials for this job:
+
+Company: {request.company_name}
+Position: {request.position_title}
+
+Job Description:
+{request.job_description}
+
+Please customize my CV and motivation letter for this position."""
+
+        result = await Runner.run(agent, prompt, session=session)
+        materials: ApplicationMaterials = result.final_output_as(ApplicationMaterials)
+
+        if materials:
+            # Store the agent and session for refinements
+            job_status_store[session_id].update({
+                "status": "completed",
+                "completed_at": datetime.now().isoformat(),
+                "agent": agent,
+                "session": session,
+                "materials": {
+                    "company": materials.company,
+                    "position": materials.position,
+                    "customized_cv": materials.customized_cv,
+                    "motivation_letter": materials.motivation_letter,
+                    "match_summary": materials.match_summary
+                }
+            })
+        else:
+            raise ValueError("Failed to generate materials")
+
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"❌ Writer initialization failed: {error_details}")
+        job_status_store[session_id].update({
+            "status": "failed",
+            "completed_at": datetime.now().isoformat(),
+            "error": str(e),
+            "error_details": error_details
+        })
+
+
+async def run_writer_refinement_task(session_id: str, refinement_request: str):
+    """
+    Background task to process refinement request and update materials.
+    """
+    try:
+        from agents import Runner
+
+        job_status_store[session_id]["status"] = "running"
+
+        # Get the stored agent and session
+        agent = job_status_store[session_id].get("agent")
+        session = job_status_store[session_id].get("session")
+
+        if not agent or not session:
+            raise ValueError("Session not initialized properly")
+
+        # Process refinement request
+        result = await Runner.run(agent, refinement_request, session=session)
+        materials: ApplicationMaterials = result.final_output_as(ApplicationMaterials)
+
+        if materials:
+            # Update materials
+            job_status_store[session_id].update({
+                "status": "completed",
+                "completed_at": datetime.now().isoformat(),
+                "materials": {
+                    "company": materials.company,
+                    "position": materials.position,
+                    "customized_cv": materials.customized_cv,
+                    "motivation_letter": materials.motivation_letter,
+                    "match_summary": materials.match_summary
+                }
+            })
+        else:
+            raise ValueError("Failed to update materials")
+
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"❌ Writer refinement failed: {error_details}")
+        job_status_store[session_id].update({
+            "status": "failed",
+            "completed_at": datetime.now().isoformat(),
+            "error": str(e),
+            "error_details": error_details
+        })
+
+
+@app.post("/api/writer/start", response_model=WriterSessionResponse)
+async def start_writer_session(request: WriterStartRequest, background_tasks: BackgroundTasks):
+    """
+    Start a new interactive writer session with user-provided materials.
+
+    Args:
+        request: Contains base CV, motivation letter, and job details
+
+    Returns:
+        session_id and status for tracking the generation process
+    """
+    session_id = str(uuid.uuid4())
+
+    job_status_store[session_id] = {
+        "session_id": session_id,
+        "type": "writer_session",
+        "status": "pending",
+        "created_at": datetime.now().isoformat(),
+        "started_at": None,
+        "completed_at": None,
+        "company_name": request.company_name,
+        "position_title": request.position_title
+    }
+
+    background_tasks.add_task(run_writer_initialization_task, session_id, request)
+
+    return WriterSessionResponse(
+        session_id=session_id,
+        status="pending",
+        message="Writer session initialized. Generating materials...",
+        timestamp=datetime.now().isoformat()
+    )
+
+
+@app.get("/api/writer/session/{session_id}", response_model=WriterStatusResponse)
+def get_writer_session(session_id: str):
+    """
+    Get the current status and materials for a writer session.
+
+    Args:
+        session_id: The unique identifier returned by /api/writer/start
+
+    Returns:
+        WriterStatusResponse with current status and materials (if completed)
+    """
+    if session_id not in job_status_store:
+        raise HTTPException(status_code=404, detail=f"Session ID '{session_id}' not found")
+
+    session_info = job_status_store[session_id]
+
+    materials_data = session_info.get("materials")
+    materials = None
+    if materials_data:
+        materials = ApplicationMaterialsResponse(**materials_data)
+
+    return WriterStatusResponse(
+        session_id=session_id,
+        status=session_info["status"],
+        materials=materials,
+        error=session_info.get("error"),
+        started_at=session_info.get("started_at"),
+        completed_at=session_info.get("completed_at")
+    )
+
+
+@app.post("/api/writer/refine/{session_id}", response_model=WriterSessionResponse)
+async def refine_writer_materials(
+    session_id: str,
+    request: WriterRefineRequest,
+    background_tasks: BackgroundTasks
+):
+    """
+    Refine the materials based on user's request.
+
+    Args:
+        session_id: The session identifier
+        request: Contains the refinement request text
+
+    Returns:
+        Updated session status
+    """
+    if session_id not in job_status_store:
+        raise HTTPException(status_code=404, detail=f"Session ID '{session_id}' not found")
+
+    session_info = job_status_store[session_id]
+
+    if session_info.get("type") != "writer_session":
+        raise HTTPException(status_code=400, detail="Invalid session type")
+
+    # Reset status to pending for refinement
+    job_status_store[session_id]["status"] = "pending"
+
+    background_tasks.add_task(
+        run_writer_refinement_task,
+        session_id,
+        request.refinement_request
+    )
+
+    return WriterSessionResponse(
+        session_id=session_id,
+        status="pending",
+        message="Processing refinement request...",
+        timestamp=datetime.now().isoformat()
+    )
+
+
+@app.post("/api/writer/save/{session_id}")
+async def save_writer_session(session_id: str):
+    """
+    Save the current materials to files.
+
+    Args:
+        session_id: The session identifier
+
+    Returns:
+        File paths where materials were saved
+    """
+    if session_id not in job_status_store:
+        raise HTTPException(status_code=404, detail=f"Session ID '{session_id}' not found")
+
+    session_info = job_status_store[session_id]
+
+    if session_info["status"] != "completed":
+        raise HTTPException(
+            status_code=400,
+            detail="Materials not ready. Please wait for generation to complete."
+        )
+
+    materials_data = session_info.get("materials")
+    if not materials_data:
+        raise HTTPException(status_code=400, detail="No materials available to save")
+
+    # Convert to ApplicationMaterials model
+    materials = ApplicationMaterials(**materials_data)
+    company_name = session_info.get("company_name", "Unknown")
+
+    # Save to files
+    file_paths = save_interactive_session(materials, company_name)
+
+    return {
+        "success": True,
+        "message": "Materials saved successfully",
+        "file_paths": file_paths,
+        "timestamp": datetime.now().isoformat()
+    }
 
 
 if __name__ == "__main__":
