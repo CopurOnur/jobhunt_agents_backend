@@ -1,0 +1,64 @@
+{
+  "name": "Seray Soyman",
+  "email": null,
+  "profile_id": "seray",
+  "timezone": "Europe/Amsterdam",
+  "search_criteria": {
+    "role_variations": [
+      "Trainer",
+      "Learning & Development (L&D) Specialist",
+      "L&D Specialist",
+      "Learning Designer",
+      "Experiential Learning Designer",
+      "Instructional Designer",
+      "Course Designer",
+      "Training Designer",
+      "Educational Designer",
+      "E-Learning Designer"
+    ],
+    "location_prefs": {
+      "country": "Netherlands",
+      "cities": [
+        "Amsterdam",
+        "Rotterdam",
+        "The Hague",
+        "Utrecht",
+        "Eindhoven",
+        "Groningen"
+      ],
+      "allow_remote": true
+    },
+    "experience": {
+      "min_years": 0,
+      "max_years": 5,
+      "exclude_senior_roles": true
+    },
+    "languages": [
+      {
+        "language": "English",
+        "required": true,
+        "exclude_if_required": false
+      },
+      {
+        "language": "Turkish",
+        "required": false,
+        "exclude_if_required": false
+      },
+      {
+        "language": "Dutch",
+        "required": false,
+        "exclude_if_required": true
+      }
+    ],
+    "posting_recency_days": 30,
+    "min_target_jobs": 8,
+    "max_target_jobs": 12,
+    "job_sources": [
+      "LinkedIn",
+      "Indeed",
+      "Glassdoor",
+      "company websites",
+      "company career pages"
+    ]
+  }
+}

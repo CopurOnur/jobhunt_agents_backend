@@ -1,0 +1,45 @@
+{
+  "name": "Example User",
+  "email": "example@example.com",
+  "profile_id": "example",
+  "timezone": "America/New_York",
+  "search_criteria": {
+    "role_variations": [
+      "Software Engineer",
+      "Full Stack Developer",
+      "Backend Engineer",
+      "Python Developer"
+    ],
+    "location_prefs": {
+      "country": "United States",
+      "cities": [
+        "San Francisco",
+        "New York",
+        "Seattle",
+        "Austin"
+      ],
+      "allow_remote": true
+    },
+    "experience": {
+      "min_years": 2,
+      "max_years": 7,
+      "exclude_senior_roles": false
+    },
+    "languages": [
+      {
+        "language": "English",
+        "required": true,
+        "exclude_if_required": false
+      }
+    ],
+    "posting_recency_days": 14,
+    "min_target_jobs": 10,
+    "max_target_jobs": 15,
+    "job_sources": [
+      "LinkedIn",
+      "Indeed",
+      "Glassdoor",
+      "AngelList"
+    ]
+  }
+}
