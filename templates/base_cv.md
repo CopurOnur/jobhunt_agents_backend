@@ -2,7 +2,7 @@
 
 ## Personal Information
 
-**Name:** Seray Soyman
+**Name:** name surname
 **Location:** Netherlands
 **Languages:** English (Fluent), Turkish (Native)
 **Email:** seray.soyman@example.com

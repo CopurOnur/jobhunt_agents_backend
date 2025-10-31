@@ -1,6 +1,6 @@
 # Motivation Letter
 
-**Seray Soyman**
+**name surname**
 Location: Netherlands
 Email: seray.soyman@example.com
 Phone: +31 XX XXX XXXX
@@ -29,7 +29,7 @@ Thank you for considering my application. I look forward to the opportunity to s
 
 Warm regards,
 
-**Seray Soyman**
+**name surname**
 
 ---
 

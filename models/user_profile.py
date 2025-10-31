@@ -73,7 +73,7 @@ class UserProfile(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "name": "Seray Soyman",
+                "name": "name surname",
                 "email": "seray@example.com",
                 "profile_id": "seray",
                 "timezone": "Europe/Amsterdam",

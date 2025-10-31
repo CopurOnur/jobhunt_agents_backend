@@ -31,7 +31,7 @@ SCHEDULE_TIME = os.getenv("SCHEDULE_TIME", "09:00")
 # Legacy User Profile (for backward compatibility)
 # This is deprecated - use get_active_user_profile() instead
 USER_PROFILE = {
-    "name": os.getenv("USER_NAME", "Seray Soyman"),
+    "name": os.getenv("USER_NAME", "name surname"),
     "location": os.getenv("USER_LOCATION", "Netherlands"),
     "languages": ["English", "Turkish"],
     "focus_roles": ["Trainer", "L&D Specialist", "Learning Designer", "Experiential Learning Designer"],

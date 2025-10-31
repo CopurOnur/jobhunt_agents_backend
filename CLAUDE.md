@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 REST API for an automated multi-agent job search and application generation system, deployed on HuggingFace Spaces. The system searches for relevant job postings and automatically generates customized CVs and motivation letters for each position.
 
-Target: English-speaking trainer, learning designer, and experiential learning designer positions in the Netherlands for Seray Soyman.
+Target: English-speaking trainer, learning designer, and experiential learning designer positions in the Netherlands for name surname.
 
 **Key difference from typical workflows**: This is an **API-triggered** system, not a scheduled/cron system. Workflows execute on-demand via HTTP requests.
 
@@ -215,7 +215,7 @@ async def trigger_workflow(background_tasks: BackgroundTasks):
 
 Required in `.env` or HuggingFace Spaces Secrets:
 - `OPENAI_API_KEY` - Must be valid OpenAI API key starting with `sk-`
-- `USER_NAME` - Defaults to "Seray Soyman"
+- `USER_NAME` - Defaults to "name surname"
 - `USER_LOCATION` - Defaults to "Netherlands"
 
 Note: `TIMEZONE` and `SCHEDULE_TIME` are not used in API mode.

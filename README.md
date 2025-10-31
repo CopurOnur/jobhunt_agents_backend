@@ -103,7 +103,7 @@ Delete a job from the status store.
 Set these in HuggingFace Spaces → Settings → Repository secrets:
 
 - **`OPENAI_API_KEY`** (required): Your OpenAI API key
-- **`USER_NAME`** (optional): Applicant name (default: "Seray Soyman")
+- **`USER_NAME`** (optional): Applicant name (default: "name surname")
 - **`USER_LOCATION`** (optional): Location (default: "Netherlands")
 
 ### User Profile

@@ -132,7 +132,7 @@ print(profiles)  # ['seray', 'example']
 
 # Load a profile
 profile = pm.load_profile('seray')
-print(profile.name)  # 'Seray Soyman'
+print(profile.name)  # 'name surname'
 
 # Check if profile exists
 exists = pm.profile_exists('seray')  # True
