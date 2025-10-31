@@ -22,7 +22,7 @@ TEMPLATES_DIR.mkdir(parents=True, exist_ok=True)
 PROFILES_DIR.mkdir(parents=True, exist_ok=True)
 
 # Profile Configuration
-ACTIVE_PROFILE_ID = os.getenv("ACTIVE_PROFILE", "seray")
+ACTIVE_PROFILE_ID = os.getenv("ACTIVE_PROFILE", "name")
 
 # Scheduling
 TIMEZONE = os.getenv("TIMEZONE", "Europe/Amsterdam")

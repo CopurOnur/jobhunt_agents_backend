@@ -32,7 +32,7 @@
 ┌─────────────────────────────────────────────────────────────┐
 │                    profiles/ directory                      │
 │  ┌────────────┐  ┌────────────┐  ┌────────────┐           │
-│  │ seray.json │  │example.json│  │  your.json │  ...      │
+│  │ name.json │  │example.json│  │  your.json │  ...      │
 │  └────────────┘  └────────────┘  └────────────┘           │
 └─────────────────────┬───────────────────────────────────────┘
                       │
@@ -83,7 +83,7 @@
 Application Start
        │
        ▼
-Read ACTIVE_PROFILE env var (default: "seray")
+Read ACTIVE_PROFILE env var (default: "name")
        │
        ▼
 ProfileManager.load_profile(profile_id)
@@ -218,7 +218,7 @@ models/__init__.py
 ## Environment Variables
 
 ```
-ACTIVE_PROFILE=seray          # Which profile to use (default: seray)
+ACTIVE_PROFILE=name          # Which profile to use (default: name)
 OPENAI_API_KEY=sk-...         # OpenAI API key
 TIMEZONE=Europe/Amsterdam      # User timezone
 SCHEDULE_TIME=09:00           # Scheduled job search time
@@ -229,7 +229,7 @@ SCHEDULE_TIME=09:00           # Scheduled job search time
 ```
 job_application_flow/
 ├── profiles/                  # Profile configurations
-│   ├── seray.json            # Profile: Seray (L&D, Netherlands)
+│   ├── name.json            # Profile: name (L&D, Netherlands)
 │   ├── example.json          # Profile: Example (SWE, USA)
 │   └── README.md
 ├── storage/

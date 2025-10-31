@@ -74,8 +74,8 @@ class UserProfile(BaseModel):
         json_schema_extra = {
             "example": {
                 "name": "name surname",
-                "email": "seray@example.com",
-                "profile_id": "seray",
+                "email": "name@example.com",
+                "profile_id": "name",
                 "timezone": "Europe/Amsterdam",
                 "search_criteria": {
                     "role_variations": [

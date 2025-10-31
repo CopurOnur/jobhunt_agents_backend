@@ -16,22 +16,22 @@ Each profile is a JSON file that defines:
 Use the `ACTIVE_PROFILE` environment variable to specify which profile to use:
 
 ```bash
-export ACTIVE_PROFILE=seray
+export ACTIVE_PROFILE=name
 ```
 
 Or in your `.env` file:
 
 ```
-ACTIVE_PROFILE=seray
+ACTIVE_PROFILE=name
 ```
 
-If not specified, defaults to `seray`.
+If not specified, defaults to `name`.
 
 ### Creating a New Profile
 
 1. Copy an existing profile as a template:
    ```bash
-   cp profiles/seray.json profiles/yourname.json
+   cp profiles/name.json profiles/yourname.json
    ```
 
 2. Edit the JSON file with your information and preferences
@@ -128,21 +128,21 @@ pm = ProfileManager(Path('profiles'))
 
 # List all profiles
 profiles = pm.list_profiles()
-print(profiles)  # ['seray', 'example']
+print(profiles)  # ['name', 'example']
 
 # Load a profile
-profile = pm.load_profile('seray')
+profile = pm.load_profile('name')
 print(profile.name)  # 'name surname'
 
 # Check if profile exists
-exists = pm.profile_exists('seray')  # True
+exists = pm.profile_exists('name')  # True
 
 # Save a modified profile
-pm.save_profile(profile, 'seray')
+pm.save_profile(profile, 'name')
 ```
 
 ## Examples
 
-See `seray.json` for a Learning & Development specialist profile targeting Netherlands.
+See `name.json` for a Learning & Development specialist profile targeting Netherlands.
 
 See `example.json` for a Software Engineer profile targeting United States.

@@ -2,7 +2,7 @@
 
 **name surname**
 Location: Netherlands
-Email: seray.soyman@example.com
+Email: name.soyman@example.com
 Phone: +31 XX XXX XXXX
 
 Date: [To be customized]
