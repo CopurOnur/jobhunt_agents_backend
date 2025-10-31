@@ -129,10 +129,17 @@ class ApplicationMaterialsResponse(BaseModel):
     match_summary: str
 
 
+class ChatMessage(BaseModel):
+    role: str  # 'user' | 'assistant' | 'system'
+    content: str
+    timestamp: str
+
+
 class WriterStatusResponse(BaseModel):
     session_id: str
     status: str
     materials: Optional[ApplicationMaterialsResponse] = None
+    chat_history: Optional[List[ChatMessage]] = None
     error: Optional[str] = None
     started_at: Optional[str] = None
     completed_at: Optional[str] = None
@@ -611,6 +618,14 @@ Please customize my CV and motivation letter for this position."""
                     "match_summary": materials.match_summary
                 }
             })
+
+            # Add assistant message to chat history
+            assistant_message = {
+                "role": "assistant",
+                "content": f"I've generated customized application materials for {materials.position} at {materials.company}. Review the materials and let me know if you'd like any refinements.",
+                "timestamp": datetime.now().isoformat()
+            }
+            job_status_store[session_id]["chat_history"].append(assistant_message)
         else:
             raise ValueError("Failed to generate materials")
 
@@ -633,20 +648,38 @@ async def run_writer_refinement_task(session_id: str, refinement_request: str):
     try:
         from agents import Runner
 
+        print(f"🔄 Starting refinement task for session {session_id}")
+        print(f"   Refinement request: {refinement_request}")
+
         job_status_store[session_id]["status"] = "running"
 
         # Get the stored agent and session
         agent = job_status_store[session_id].get("agent")
         session = job_status_store[session_id].get("session")
 
+        print(f"   Agent exists: {agent is not None}")
+        print(f"   Session exists: {session is not None}")
+
         if not agent or not session:
             raise ValueError("Session not initialized properly")
 
         # Process refinement request
+        print(f"   Calling Runner.run with refinement request...")
         result = await Runner.run(agent, refinement_request, session=session)
+        print(f"   Runner.run completed")
         materials: ApplicationMaterials = result.final_output_as(ApplicationMaterials)
+        print(f"   Materials extracted: {materials is not None}")
 
         if materials:
+            # Log the changes for debugging
+            old_materials = job_status_store[session_id].get("materials", {})
+            old_letter = old_materials.get("motivation_letter", "")
+            new_letter = materials.motivation_letter
+
+            print(f"   Old letter length: {len(old_letter)}")
+            print(f"   New letter length: {len(new_letter)}")
+            print(f"   Materials changed: {old_letter != new_letter}")
+
             # Update materials
             job_status_store[session_id].update({
                 "status": "completed",
@@ -659,6 +692,15 @@ async def run_writer_refinement_task(session_id: str, refinement_request: str):
                     "match_summary": materials.match_summary
                 }
             })
+
+            # Add assistant response to chat history
+            assistant_message = {
+                "role": "assistant",
+                "content": "I've updated the materials based on your request. The changes are reflected in the preview. Feel free to request more refinements or save when ready.",
+                "timestamp": datetime.now().isoformat()
+            }
+            job_status_store[session_id]["chat_history"].append(assistant_message)
+            print(f"✅ Refinement completed successfully")
         else:
             raise ValueError("Failed to update materials")
 
@@ -666,6 +708,8 @@ async def run_writer_refinement_task(session_id: str, refinement_request: str):
         import traceback
         error_details = traceback.format_exc()
         print(f"❌ Writer refinement failed: {error_details}")
+        print(f"   Error type: {type(e).__name__}")
+        print(f"   Error message: {str(e)}")
         job_status_store[session_id].update({
             "status": "failed",
             "completed_at": datetime.now().isoformat(),
@@ -695,7 +739,14 @@ async def start_writer_session(request: WriterStartRequest, background_tasks: Ba
         "started_at": None,
         "completed_at": None,
         "company_name": request.company_name,
-        "position_title": request.position_title
+        "position_title": request.position_title,
+        "chat_history": [
+            {
+                "role": "system",
+                "content": "Generating customized application materials...",
+                "timestamp": datetime.now().isoformat()
+            }
+        ]
     }
 
     background_tasks.add_task(run_writer_initialization_task, session_id, request)
@@ -733,6 +784,7 @@ def get_writer_session(session_id: str):
         session_id=session_id,
         status=session_info["status"],
         materials=materials,
+        chat_history=session_info.get("chat_history", []),
         error=session_info.get("error"),
         started_at=session_info.get("started_at"),
         completed_at=session_info.get("completed_at")
@@ -755,6 +807,9 @@ async def refine_writer_materials(
     Returns:
         Updated session status
     """
+    print(f"📥 Received refinement request for session {session_id}")
+    print(f"   Request: {request.refinement_request}")
+
     if session_id not in job_status_store:
         raise HTTPException(status_code=404, detail=f"Session ID '{session_id}' not found")
 
@@ -763,14 +818,25 @@ async def refine_writer_materials(
     if session_info.get("type") != "writer_session":
         raise HTTPException(status_code=400, detail="Invalid session type")
 
+    # Add user message to chat history
+    user_message = {
+        "role": "user",
+        "content": request.refinement_request,
+        "timestamp": datetime.now().isoformat()
+    }
+    job_status_store[session_id]["chat_history"].append(user_message)
+    print(f"   User message added to chat history")
+
     # Reset status to pending for refinement
     job_status_store[session_id]["status"] = "pending"
+    print(f"   Status set to pending")
 
     background_tasks.add_task(
         run_writer_refinement_task,
         session_id,
         request.refinement_request
     )
+    print(f"   Background task scheduled")
 
     return WriterSessionResponse(
         session_id=session_id,
