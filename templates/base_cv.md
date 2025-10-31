@@ -5,8 +5,8 @@
 **Name:** name surname
 **Location:** Netherlands
 **Languages:** English (Fluent), Turkish (Native)
-**Email:** name.soyman@example.com
-**LinkedIn:** linkedin.com/in/name-soyman
+**Email:** name.surname@example.com
+**LinkedIn:** linkedin.com/in/name-surname
 
 ---
 
