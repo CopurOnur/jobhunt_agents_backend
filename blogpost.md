@@ -193,7 +193,7 @@ Example profile structure:
 
 ```json
 {
-  "name": "Seray Soyman",
+  "name": "name surname",
   "profile_id": "seray",
   "search_criteria": {
     "role_variations": ["Trainer", "Learning Designer", "L&D Specialist"],
