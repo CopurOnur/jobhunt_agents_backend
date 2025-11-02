@@ -21,6 +21,7 @@ from job_agents.application_writer_agent import (
     save_application_materials
 )
 from models import JobSearchOutput, ApplicationMaterials
+from config.settings import get_active_user_profile
 
 
 class JobApplicationWorkflow:
@@ -30,6 +31,7 @@ class JobApplicationWorkflow:
         """Initialize the workflow with agents and session."""
         self.job_finder = create_job_finder_agent()
         self.application_writer = create_application_writer_agent()
+        self.user_profile = get_active_user_profile()
         # Create session with unique ID or use default
         if session_id is None:
             session_id = f"workflow_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -72,11 +74,11 @@ Return 8-12 high-quality job postings with all details."""
             jobs_with_scores = []
             for job in job_search_output.jobs:
                 job_dict = job.model_dump()
-                job_dict['match_score'] = score_job_match(job_dict)
+                job_dict['match_score'] = score_job_match(job_dict, self.user_profile)
                 jobs_with_scores.append(job_dict)
 
             # Save job postings
-            save_job_postings(jobs_with_scores, job_search_output.search_date)
+            save_job_postings(jobs_with_scores, job_search_output.search_date, self.user_profile)
 
             # Step 2: Generate applications for each job
             application_results = []
@@ -191,11 +193,11 @@ Return 8-12 high-quality job postings."""
             jobs_with_scores = []
             for job in job_search_output.jobs:
                 job_dict = job.model_dump()
-                job_dict['match_score'] = score_job_match(job_dict)
+                job_dict['match_score'] = score_job_match(job_dict, self.user_profile)
                 jobs_with_scores.append(job_dict)
 
             # Save results
-            save_job_postings(jobs_with_scores, job_search_output.search_date)
+            save_job_postings(jobs_with_scores, job_search_output.search_date, self.user_profile)
 
             return {
                 "success": True,

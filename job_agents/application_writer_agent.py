@@ -159,7 +159,7 @@ Begin with a concise checklist (3–7 bullets) of what you will do; keep items c
   - A job description (full text)
 - If any template or job description is missing, malformed, not in English or Dutch, or in an unsupported format, or contains ambiguous placeholders/unsupported formatting, do NOT proceed. Return only:
   ```
-  { "error": "<brief description of the input issue>" }
+  {{ "error": "<brief description of the input issue>" }}
   ```
 
 # Objectives
@@ -206,7 +206,7 @@ Begin with a concise checklist (3–7 bullets) of what you will do; keep items c
   - summary_of_changes: Array summarizing significant customizations made from the templates
 - If any input errors arise, return only:
   ```
-  { "error": "<brief description of the input issue>" }
+  {{ "error": "<brief description of the input issue>" }}
   ```
 - Fill all output fields unless returning an error.
 
@@ -335,21 +335,21 @@ Return responses as a single structured JSON object. Use the following schemas:
 
 Successful Output Example:
 ```
-{{
+{{{{
   "company": "Company Name or null",
   "position": "Job Title or null",
   "customized_cv_file": "customized_cv.docx",
   "motivation_letter_file": "customized_motivation_letter.docx",
   "match_summary": "- Match score: 87%\\n- Strong leadership in agile projects...",  // Markdown
   "summary_of_changes": "- Highlighted new certification in CV\\n- Shortened final motivation letter paragraph..." // Markdown
-}}
+}}}}
 ```
 
 Error Output (on missing input):
 ```
-{{
+{{{{
   "error": "Missing base CV input is required."
-}}
+}}}}
 ```
 
 All outputs must strictly conform to these JSON schemas for downstream processing compatibility.
