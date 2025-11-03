@@ -51,8 +51,8 @@
       }
     ],
     "posting_recency_days": 30,
-    "min_target_jobs": 8,
-    "max_target_jobs": 12,
+    "min_target_jobs": 10,
+    "max_target_jobs": 15,
     "job_sources": [
       "LinkedIn",
       "Indeed",

@@ -28,6 +28,11 @@ ACTIVE_PROFILE_ID = os.getenv("ACTIVE_PROFILE", "name")
 TIMEZONE = os.getenv("TIMEZONE", "Europe/Amsterdam")
 SCHEDULE_TIME = os.getenv("SCHEDULE_TIME", "09:00")
 
+# Job URL Scraping Configuration
+ENABLE_URL_SCRAPING = os.getenv("ENABLE_URL_SCRAPING", "true").lower() == "true"
+MAX_SCRAPING_RETRIES = int(os.getenv("MAX_SCRAPING_RETRIES", "2"))
+SCRAPING_TIMEOUT_MS = int(os.getenv("SCRAPING_TIMEOUT_MS", "15000"))
+
 # Legacy User Profile (for backward compatibility)
 # This is deprecated - use get_active_user_profile() instead
 USER_PROFILE = {

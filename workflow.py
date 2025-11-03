@@ -20,6 +20,7 @@ from job_agents.application_writer_agent import (
     create_application_writer_agent,
     save_application_materials
 )
+from job_agents.job_scraper import enrich_jobs_with_urls, PLAYWRIGHT_AVAILABLE
 from models import JobSearchOutput, ApplicationMaterials
 from config.settings import get_active_user_profile
 
@@ -76,6 +77,16 @@ Return 8-12 high-quality job postings with all details."""
                 job_dict = job.model_dump()
                 job_dict['match_score'] = score_job_match(job_dict, self.user_profile)
                 jobs_with_scores.append(job_dict)
+
+            # Enrich jobs with real URLs by scraping (if enabled)
+            if PLAYWRIGHT_AVAILABLE:
+                print("🔍 Enriching job URLs with targeted scraping...")
+                jobs_with_scores = await enrich_jobs_with_urls(
+                    jobs_with_scores,
+                    location=self.user_profile.search_criteria.location_prefs.country
+                )
+            else:
+                print("⚠️  URL scraping disabled (Playwright not installed)")
 
             # Save job postings
             save_job_postings(jobs_with_scores, job_search_output.search_date, self.user_profile)
@@ -195,6 +206,16 @@ Return 8-12 high-quality job postings."""
                 job_dict = job.model_dump()
                 job_dict['match_score'] = score_job_match(job_dict, self.user_profile)
                 jobs_with_scores.append(job_dict)
+
+            # Enrich jobs with real URLs by scraping (if enabled)
+            if PLAYWRIGHT_AVAILABLE:
+                print("🔍 Enriching job URLs with targeted scraping...")
+                jobs_with_scores = await enrich_jobs_with_urls(
+                    jobs_with_scores,
+                    location=self.user_profile.search_criteria.location_prefs.country
+                )
+            else:
+                print("⚠️  URL scraping disabled (Playwright not installed)")
 
             # Save results
             save_job_postings(jobs_with_scores, job_search_output.search_date, self.user_profile)
